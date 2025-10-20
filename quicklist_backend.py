@@ -55,6 +55,9 @@ class DataBackend:
         if not query:
             return self.data[:limit]
 
+        # TODO: Replace this with a proper preprocessor
+        query["name"].replace(" ", "").lower()
+
         results = process.extract(
             query=query, choices=self.data, processor=lambda x: x["name"], limit=limit
         )

@@ -1,32 +1,23 @@
 from textual.app import App, ComposeResult
-from textual.containers import HorizontalGroup, Container
-from textual.widgets import DataTable, Footer, Header, Input, Button
+from textual.containers import Container
+from textual.screen import Screen
+from textual.widgets import DataTable, Footer, Header, Input, Static
 
 from quicklist_backend import DataBackend
 
 
-class ModesBox(HorizontalGroup):
+class AddModeForm(Container):
     def compose(self) -> ComposeResult:
-        yield Button("Search", id="search")
-        yield Button("Insert", id="insert")
-        yield Button("Delete", id="delete")
-        yield Button("Load", id="load_file")
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        button_id = event.button.id
-        match button_id:
-            case "search":
-                self.add_class("selected")
-            case "insert":
-                self.add_class("selected")
-            case "delete":
-                self.add_class("selected")
-            case "load_file":
-                self.add_class("selected")
+        yield Input(placeholder="Enter name", id="add_name")
+        yield Input(placeholder="Enter type", id="add_type")
+        yield Input(placeholder="Enter other", id="add_other")
 
 
 class ContentBox(DataTable):
     def on_mount(self): ...
+
+
+class SearchBar(Input): ...
 
 
 class Quicklist(Container):
@@ -36,14 +27,17 @@ class Quicklist(Container):
 
     def compose(self) -> ComposeResult:
         yield ContentBox()
-        yield Input(
-            placeholder="Enter search term", type="text"
+        yield SearchBar(
+            placeholder="Enter search term",
+            type="text",
         )  # Add suggester support
 
     def on_mount(self) -> None:
         table = self.query_one(DataTable)
         table.add_columns(*self.backend.data[0].keys())
         self.update_table(self.backend.data)
+
+        self.query_one(Input).focus()
 
     def on_input_changed(self, event: Input.Changed) -> None:
         query = event.value
@@ -60,6 +54,17 @@ class Quicklist(Container):
             table.add_rows(rows)
 
 
+class InsertMode(Screen):
+    def compose(self) -> ComposeResult:
+        yield Quicklist()
+        yield AddModeForm()
+
+
+class NormalMode(Screen):
+    def compose(self) -> ComposeResult:
+        yield Quicklist()
+
+
 class QuickListApp(App):
     # TODO:
     # - implement mode switching
@@ -71,32 +76,22 @@ class QuickListApp(App):
     """
 
     BINDINGS = [
-        ("s", "search_mode", "Enter Search Mode"),
-        ("a", "add_mode", "Enter Insertion Mode"),
+        ("s", "switch_mode('normal_mode')", "Enter Search Mode"),
+        ("a", "switch_mode('add_mode')", "Enter Insertion Mode"),
         ("d", "delete_mode", "Enter Deletion Mode"),
         ("l", "loading_mode", "Enter File Loading Mode"),
-        ("esc", "normal_mode", "Enter Normal Mode"),
+        ("esc", "switch_mode('normal_mode')", "Enter Normal Mode"),
     ]
+    MODES = {
+        "add_mode": InsertMode,
+        "normal_mode": NormalMode,
+    }
     CSS_PATH = "quicklist.tcss"
 
     def compose(self) -> ComposeResult:
         yield Header()
         yield Quicklist()
         yield Footer()
-
-    def action_add_mode(self) -> None:
-        search_bar = self.query_one(Quicklist).query_one(Input)
-        search_bar.focus()
-
-    def action_delete_mode(self) -> None: ...
-    def action_loading_mode(self) -> None: ...
-    # Can be replaced by DB loading abstraction
-    def action_search_mode(self) -> None:
-        search_bar = self.query_one(Quicklist).query_one(Input)
-        search_bar.focus()
-
-    def action_normal_mode(self) -> None:
-        self.query_one(Quicklist).query_one(DataTable).focus()
 
 
 if __name__ == "__main__":
