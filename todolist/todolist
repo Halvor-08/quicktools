@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+
+"""
+A simply program to store and list songs to download
+Also has the capability to list all downloaded songs
+Usage:
+ - Entries can be added in "entry" mode.
+    - Each entry is parsed as [artist: str | list] -a [album: str | list] -s [song: str | list]
+    - Each entry element is optional, e.g. a song without artist or album can be added.
+      Any missing elements will be printed as '-' (dashes/hyphens)
+
+    IMPORTANT:
+    Currently moving to structured file approach. This file is intrypoint, will only handle calling and maybe JSON reading
+"""
+
+from parser import create_parser
+from database import JsonDatabase
+
+
+def main():
+    parser = create_parser()
+    args = parser.parse_args()
+
+    if args.db == "json":
+        db = JsonDatabase()
+    args.func(args, db)
+
+
+if __name__ == "__main__":
+    main()

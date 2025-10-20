@@ -1,0 +1,67 @@
+[
+  {
+    "title": "FINNEAS",
+    "note": "",
+    "singles": [
+      {
+        "title": "Angel",
+        "note": null
+      }
+    ],
+    "albums": [
+      {
+        "title": "For Cryin' Out Loud",
+        "note": null,
+        "songEntries": [
+          {
+            "title": "Starfucker",
+            "note": null
+          },
+          {
+            "title": "What's It Gonna Take To Break Your Heart",
+            "note": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "titletest",
+    "note": null,
+    "singles": [
+      {
+        "title": "artist_test",
+        "note": null
+      }
+    ],
+    "albums": []
+  },
+  {
+    "title": "thisIsATitle",
+    "note": null,
+    "singles": [],
+    "albums": [
+      {
+        "title": "theArtist",
+        "note": null,
+        "songEntries": [
+          {
+            "title": "theArtist",
+            "note": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "aSingle",
+    "note": null,
+    "singles": [
+      {
+        "title": "theArtist",
+        "note": null
+      }
+    ],
+    "albums": []
+  }
+]

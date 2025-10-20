@@ -1,0 +1,28 @@
+ModesBox {
+    background: $boost;
+    align: center middle;
+    min-height: 5;
+  }
+
+ModesBox Button {
+    margin: 0 5;
+  }
+
+ModesBox Button .selected {
+    color: red;
+  }
+
+ContentBox {
+    align: center middle;
+  }
+
+InputBox {
+    dock: bottom;
+  }
+
+Placeholder {
+    width: 10vw;
+    height: 10vh;
+  }
+
+

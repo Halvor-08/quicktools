@@ -1,0 +1,18 @@
+{
+  "FINNEAS": {
+    "singles": [{ "title": "Angel", "note": "" }],
+    "albums": [
+      {
+        "title": "For Cryin' Out Loud",
+        "note": "",
+        "songEntries": [
+          { "title": "Starfucker", "note": "" },
+          { "title": "What's It Gonna Take To Break Your Heart", "note": "" }
+        ]
+      }
+    ],
+    "title": "FINNEAS",
+    "note": ""
+  }
+}
+
