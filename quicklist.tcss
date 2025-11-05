@@ -6,9 +6,6 @@ SearchBar {
     dock: bottom;
   }
 
-Placeholder {
-    width: 10vw;
-    height: 10vh;
+AddModeForm {
+    background: blue;
   }
-
-
