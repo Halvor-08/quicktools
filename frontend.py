@@ -1,7 +1,8 @@
+from textual.reactive import reactive
 from textual.app import App, ComposeResult
 from textual.containers import Container
 from textual.screen import Screen
-from textual.widgets import Button, DataTable, Footer, Header, Input
+from textual.widgets import Button, DataTable, Footer, Header, Input, RichLog
 from textual.binding import Binding
 
 from backend import DataBackend
@@ -89,7 +90,7 @@ class Quicklist(Container):
             table.add_rows(rows)
 
 
-class InsertMode(Screen):
+class InsertBlock(Container):
     def compose(self) -> ComposeResult:
         yield Quicklist()
         yield AddModeForm()
@@ -115,35 +116,102 @@ class NormalMode(Screen):
         yield Quicklist()
 
 
+class CellInput(Input):
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        caller = self.query_ancestor(DataContainer)
+        caller.update_cell_value(event.value)
+
+
+class DataContainer(Container):
+    insert_flag = reactive(False)
+
+    # {
+    #     'row': '',
+    #     'col': '',
+    # }
+
+    def compose(self) -> ComposeResult:
+        yield DataTable()
+        yield RichLog()
+
+    def on_mount(self) -> None:
+        table = self.query_one(DataTable)
+        table.add_columns(*DB_ENTRY.data[0].keys())
+        self.update_table(DB_ENTRY.data)
+
+    def update_table(self, data: list[dict]) -> None:
+        # Update the datatable component
+        table = self.query_one(DataTable)
+        table.clear()
+
+        if data:
+            rows = [tuple(d.values()) for d in data]
+            table.add_rows(rows)
+
+    def watch_insert_flag(self):
+        if self.insert_flag is True:
+            self.update_cell()
+
+    def update_cell(self):
+        datatable = self.query_one(DataTable)
+        cell = datatable.cursor_coordinate
+        self.query_one(RichLog).write(
+            f"Cell at {cell}, with data {datatable.get_cell_at(cell)}"
+        )
+        self.mount(Input())
+        cell_input = self.query_one(Input)
+        cell_input.focus()
+
+    def update_cell_value(self, new_value):
+        dt = self.query_one(DataTable)
+        row = dt.cursor_coordinate.row
+        dt_coordinate = dt.update_cell(row, column, new_value)
+
+
 class QuickListApp(App):
     # TODO:
     # - implement mode switching
     """
     Main application class, handles:
     - keybinds
-    - mode switching
     - application wide settings
     """
 
+    # TODO:
+    # - Add o and O for column insertions
     BINDINGS = [
-        ("n", "switch_mode('normal_mode')", "Enter Normal Mode"),
-        ("a", "switch_mode('add_mode')", "Enter Insertion Mode"),
-        ("i", "insert_mode", "Insert a new entry"),
-        ("d", "delete_mode", "Enter Deletion Mode"),
-        ("l", "loading_mode", "Enter File Loading Mode"),
-        ("esc", "switch_mode('normal_mode')", "Enter Normal Mode"),
-        Binding("escape", "switch_mode('normal_mode')", priority=True),
+        ("n", "set_mode('normal')", "Enter Normal Mode"),
+        ("a", "set_mode('add_after')", "Enter Insertion Mode"),
+        ("i", "set_mode('add_before')", "Insert a new entry"),
+        ("d", "set_mode('delete')", "Enter Deletion Mode"),
+        Binding("escape", "set_mode('normal')", priority=True),
     ]
-    MODES = {
-        "add_mode": InsertMode,
-        "normal_mode": NormalMode,
-    }
+
     CSS_PATH = "quicklist.tcss"
+
+    mode = reactive("normal")
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield Quicklist()
+        yield DataContainer()
+        yield SearchBar(
+            placeholder="Enter search term",
+            type="text",
+        )  # Add suggester support
         yield Footer()
+
+    def on_input_changed(self, event: Input.Changed) -> None:
+        query = event.value
+        results = DB_ENTRY.search({"name": query})
+        table = self.query_one(DataContainer)
+        table.update_table(results)
+
+    def action_set_mode(self, mode):
+        self.mode = mode
+
+    def watch_mode(self):
+        self.query_one(SearchBar).placeholder = self.mode
+        self.query_one(DataContainer).insert_flag = True
 
 
 if __name__ == "__main__":

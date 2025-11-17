@@ -2,9 +2,6 @@ ContentBox {
     align: center middle;
   }
 
-SearchBar {
-    dock: bottom;
-  }
 
 AddModeForm {
     background: blue;

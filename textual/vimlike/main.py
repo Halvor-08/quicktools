@@ -3,6 +3,7 @@ from textual.binding import Binding
 from textual.widgets import TextArea
 
 from enum import Enum
+
 # TODO: Implement a VIM like mode-based application
 # - Add a modehandler class which maintains a global variable
 
